@@ -22,7 +22,7 @@
  */
 'use strict';
 
-const VERSION = 'v3';                       // bump on every shell change
+const VERSION = 'v4';                       // bump on every shell change
 
 const SHELL_PREFIX = 'lit-shell-';
 const SHELL_CACHE = SHELL_PREFIX + VERSION;

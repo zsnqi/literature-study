@@ -66,10 +66,11 @@ var CSS = [
   '.pa-hl.two{box-shadow:inset 0 -2px 0 var(--dc2)}',
   DEVS.map(function (d) { return '.pa-d-' + d + '{--dc:var(--dv-' + d + ');--di:var(--dv-' + d + '-ink);--dw:var(--dv-' + d + '-wash)}'; }).join('\n'),
   '.pa-dot{display:inline-block;width:8px;height:8px;border-radius:4px;background:var(--dc);flex:none}',
-  '.pa-leg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:12px 4px 0;font-size:13px;color:var(--label2)}',
-  '.pa-leg span{display:inline-flex;align-items:center;gap:6px}',
-  '.pa-leg .pa-leg-t{flex-direction:column;align-items:flex-start;gap:1px}',
-  '.pa-leg .pa-leg-ar{color:var(--label);font-weight:600}',
+  '.pa-leg{margin:12px 0 0;padding:2px 16px;border-radius:18px;background:var(--card);box-shadow:var(--shadow)}',
+  '.pa-leg-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}',
+  '.pa-leg-row+.pa-leg-row{border-top:0.5px solid var(--sep)}',
+  '.pa-leg-ar{font-size:15px;font-weight:600;color:var(--label)}',
+  '.pa-leg-en{font-size:15px;padding:2px 8px;border-radius:7px}',
   '.pa-hint{margin:12px 4px 0;font-size:13px;color:var(--label3);line-height:1.5}',
   /* line sheet */
   '.pa-sh-line{margin:6px 0;direction:ltr;text-align:left;font-family:var(--pa-poem);font-size:19px;line-height:1.55}',
@@ -413,11 +414,12 @@ function openTopic(id, unit, back) {
       if (fi.breaks[i]) card.appendChild(h('div', { class: 'pa-sgap', 'aria-hidden': 'true' }));
     });
     box.appendChild(card);
-    var devs = Object.keys(used).sort(function (a, b) { return DEVS.indexOf(a) - DEVS.indexOf(b); });
+    /* legend: one row per device, in the order it first appears in the poem; the English term wears the same colour as in the poem */
+    var devs = Object.keys(used);
     if (devs.length) {
-      box.appendChild(h('div', { class: 'pa-leg', dir: 'ltr' }, devs.map(function (d) {
+      box.appendChild(h('div', { class: 'pa-leg' }, devs.map(function (d) {
         var dv = (D.devices || {})[d] || {};
-        return h('span', null, h('span', { class: 'pa-dot ' + devCls(d) }), h('span', { class: 'pa-leg-t' }, bdi(dv.en || d, 'en'), dv.ar ? h('span', { class: 'pa-leg-ar', dir: 'rtl' }, dv.ar) : null));
+        return h('div', { class: 'pa-leg-row' }, h('span', { class: 'pa-leg-ar' }, dv.ar || ''), h('bdi', { class: 'pa-hl pa-leg-en ' + devCls(d), dir: 'ltr' }, dv.en || d));
       })));
     }
   }

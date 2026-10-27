@@ -22,7 +22,7 @@
  */
 'use strict';
 
-const VERSION = 'v4';                       // bump on every shell change
+const VERSION = 'v5';                     // bump on every shell change
 
 const SHELL_PREFIX = 'lit-shell-';
 const SHELL_CACHE = SHELL_PREFIX + VERSION;
@@ -33,7 +33,7 @@ const INDEX_URL = abs('./index.html');
 // Must be cached or the install fails (the worker then retries later; the old one keeps running).
 const SHELL_REQUIRED = [
   './', './index.html', './data.js', './data-questions.js', './data-questions-ar.js', './data-poems.js',
-  './app-core.js', './app-practice.js', './app-more.js', './app-paragraph.js',
+  './app-core.js', './app-practice.js', './app-more.js', './app-paragraph.js', './app-note.js',
   './manifest.webmanifest',
 ].map(abs);
 // Best effort: a failure is logged but does not block the install.

@@ -66,8 +66,10 @@ var CSS = [
   '.pa-hl.two{box-shadow:inset 0 -2px 0 var(--dc2)}',
   DEVS.map(function (d) { return '.pa-d-' + d + '{--dc:var(--dv-' + d + ');--di:var(--dv-' + d + '-ink);--dw:var(--dv-' + d + '-wash)}'; }).join('\n'),
   '.pa-dot{display:inline-block;width:8px;height:8px;border-radius:4px;background:var(--dc);flex:none}',
-  '.pa-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 4px 0;font-size:13px;color:var(--label2)}',
+  '.pa-leg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:12px 4px 0;font-size:13px;color:var(--label2)}',
   '.pa-leg span{display:inline-flex;align-items:center;gap:6px}',
+  '.pa-leg .pa-leg-t{flex-direction:column;align-items:flex-start;gap:1px}',
+  '.pa-leg .pa-leg-ar{color:var(--label);font-weight:600}',
   '.pa-hint{margin:12px 4px 0;font-size:13px;color:var(--label3);line-height:1.5}',
   /* line sheet */
   '.pa-sh-line{margin:6px 0;direction:ltr;text-align:left;font-family:var(--pa-poem);font-size:19px;line-height:1.55}',
@@ -415,7 +417,7 @@ function openTopic(id, unit, back) {
     if (devs.length) {
       box.appendChild(h('div', { class: 'pa-leg', dir: 'ltr' }, devs.map(function (d) {
         var dv = (D.devices || {})[d] || {};
-        return h('span', null, h('span', { class: 'pa-dot ' + devCls(d) }), bdi(dv.en || d, 'en'));
+        return h('span', null, h('span', { class: 'pa-dot ' + devCls(d) }), h('span', { class: 'pa-leg-t' }, bdi(dv.en || d, 'en'), dv.ar ? h('span', { class: 'pa-leg-ar', dir: 'rtl' }, dv.ar) : null));
       })));
     }
   }

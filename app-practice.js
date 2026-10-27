@@ -20,6 +20,13 @@ var CSS = [
   '.pr-grow{flex:1 1 auto;min-height:6px}',
   '.pr-end{margin-inline-start:auto}',
   '.pr-q{white-space:pre-line}',
+  '.q-ar{display:none;direction:rtl;text-align:right;font-family:inherit;color:var(--label2);line-height:1.6}',
+  '.show-ar .q-ar{display:block}',
+  'p.q-ar{margin:8px 0 0;padding:8px 12px;border-radius:12px;background:var(--fill);font-size:15px;color:var(--label)}',
+  '.o-t{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}',
+  '.o-ar{font-size:14px;font-weight:500}',
+  '.q-tr{margin-inline-start:auto;min-height:36px;padding:6px 14px;border-radius:18px;background:var(--fill);color:var(--tint);font-size:14px;font-weight:600}',
+  '.q-tr[aria-pressed="true"]{background:var(--tint);color:#fff}',
   '.opt:disabled{cursor:default;color:inherit}',
   '.opt.pr-sel{border-color:var(--tint);background:var(--fill2)}',
   '.opt.pr-sel .o-k{background:var(--tint);color:#fff}',
@@ -160,16 +167,22 @@ function givenText(q, given, extra) {
    5. Question views
    ctx.pick(ok, given, extra): the answer is final (practice) or a selection (mock, can change)
    ===================================================================== */
+/* Arabic translation (D.qAr, optional): shown under the stem and each option when she taps «ترجمة» */
+function arOf(q) { var t = (D.qAr || {})[q.id]; return t && t.q ? t : null; }
 function promptNode(q) {
-  return h('div', null, h('p', { class: 'q-text ltr pr-q', dir: 'ltr', lang: 'en' }, q.x.q));
+  var t = arOf(q);
+  return h('div', null, h('p', { class: 'q-text ltr pr-q', dir: 'ltr', lang: 'en' }, q.x.q),
+    t ? h('p', { class: 'q-ar', dir: 'rtl', lang: 'ar' }, t.q) : null);
 }
 
 function choiceView(q, ctx) {
-  var m = mcqOptions(q);
+  var m = mcqOptions(q), t = arOf(q);
+  function oAr(k) { var a = t && Array.isArray(t.o) ? t.o[k] : ''; return a && a !== String(q.x.o[k]).trim() ? h('span', { class: 'q-ar o-ar', dir: 'rtl', lang: 'ar' }, a) : null; }
   var wrap = h('div', { class: 'opts' });
   var btns = m.opts.map(function (o, i) {
     var b = h('button', { class: 'opt ltr', type: 'button', dir: 'ltr', lang: 'en', 'aria-pressed': ctx.mock ? 'false' : null },
-      h('span', { class: 'o-k' }, String.fromCharCode(97 + i)), h('span', null, o));
+      h('span', { class: 'o-k' }, String.fromCharCode(97 + i)),
+      h('span', { class: 'o-t' }, h('span', null, o), oAr(m.idx[i])));
     b.addEventListener('click', function () { pick(i); });
     wrap.appendChild(b);
     return b;
@@ -309,7 +322,14 @@ function showQ(s) {
   /* the state chip shows only after she answers (before that it would read as a verdict) */
   var chip = null;
   var meta = h('div', { class: 'q-meta' }, App.tag(q.lec), KIND_AR[q.type] ? h('span', { class: 'q-kind' }, KIND_AR[q.type]) : null);
-  var card = h('section', { class: 'card q-card', 'aria-label': 'السؤال' }, meta, promptNode(q));
+  var card = h('section', { class: 'card q-card' + (prefs().tr ? ' show-ar' : ''), 'aria-label': 'السؤال' }, meta, promptNode(q));
+  if (arOf(q)) {
+    var trBtn = h('button', { class: 'q-tr', type: 'button', 'aria-pressed': prefs().tr ? 'true' : 'false', onclick: function () {
+      var on = !prefs().tr; prefs().tr = on; App.save();
+      card.classList.toggle('show-ar', on); trBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    } }, 'ترجمة');
+    meta.appendChild(trBtn);
+  }
   var view = (VIEWS[q.type] || choiceView)(q, ctx);
   card.appendChild(view.el);
   var after = h('div');

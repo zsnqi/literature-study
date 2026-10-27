@@ -1448,7 +1448,7 @@ else setTimeout(boot, 0);
 /* =====================================================================
    14. Public API (documented in docs/app-api.md)
    ===================================================================== */
-App.version = 'v5';            /* keep equal to VERSION in sw.js; bump both on every release */
+App.version = 'v6';            /* keep equal to VERSION in sw.js; bump both on every release */
 App.D = D;
 Object.defineProperty(App, 'state', { enumerable: true, get: function () { return state; } });
 Object.defineProperty(App, 'env', { enumerable: true, get: function () { return env; } });

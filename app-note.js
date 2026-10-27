@@ -1,7 +1,7 @@
 /* app-note.js — one-time note banner (a private message from the user to the student).
    How it works: reads ./message.json (not cached by the service worker). If its `id` has not been
-   shown on this device yet, a banner slides in from the top once, then its id is stored in
-   localStorage 'lit-note-seen' so it never shows again. To send a new note: change the file
+   been dismissed on this device yet, a banner slides in from the top and stays until she taps it;
+   then its id is stored in localStorage 'lit-note-seen' so it never shows again. To send a new note: change the file
    (new `id`, new text) and publish. Text is always set with textContent (never as HTML).
    message.json shape: { "id": "...", "title": "أحبك", "lines": ["...", "..."] }
    An empty file, a missing file, or an id already seen: nothing happens. */
@@ -12,9 +12,8 @@ if (!App) return;
 
 var SEEN_KEY = 'lit-note-seen';
 var POLL_MS = 25000;       /* while the app is open and visible */
-var SHOW_MS = 16000;       /* the banner leaves by itself after this long */
 var doc = document;
-var showing = false, timer = 0, busy = false;
+var showing = false, busy = false;
 
 var CSS = [
   '.lnote{position:absolute;z-index:70;inset-inline:12px;top:calc(env(safe-area-inset-top) + 8px);',
@@ -73,8 +72,11 @@ function closeIcon() {
   return s;
 }
 
-function hide(el) {
-  clearTimeout(timer);
+/* The banner stays until she taps it; only then is the id marked as seen. If she leaves the app
+   with the banner still open, it shows again on the next open. */
+function hide(el, id) {
+  seenAdd(id);
+  el.style.cssText = '';
   el.classList.remove('on');
   setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); showing = false; }, 600);
 }
@@ -83,7 +85,6 @@ function show(msg) {
   var host = doc.getElementById('app');
   if (!host || showing) return;
   showing = true;
-  seenAdd(msg.id);
 
   var el = doc.createElement('div');
   el.className = 'lnote';
@@ -119,11 +120,17 @@ function show(msg) {
   x.appendChild(closeIcon());
 
   el.appendChild(ic); el.appendChild(b); el.appendChild(x);
-  el.addEventListener('click', function () { hide(el); });
+  el.addEventListener('click', function () { hide(el, msg.id); });
   host.appendChild(el);
-  /* two frames so the slide-in transition runs */
-  requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('on'); }); });
-  timer = setTimeout(function () { hide(el); }, SHOW_MS);
+  /* A forced reflow (not requestAnimationFrame, which is paused while the page is not being painted)
+     makes the slide-in transition run and guarantees the banner becomes visible. */
+  void el.offsetWidth;
+  el.classList.add('on');
+  /* Safety net: if the transition is stalled (page not painted yet), show the final state anyway. */
+  setTimeout(function () {
+    if (!el.parentNode || !el.classList.contains('on')) return;
+    el.style.transition = 'none'; el.style.transform = 'none'; el.style.opacity = '1';
+  }, 1000);
 }
 
 function clean(raw) {
